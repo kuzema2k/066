@@ -1,0 +1,33 @@
+// ==UserScript==
+// @name         test bot baidu
+// @namespace    http://tampermonkey.net/
+// @version      1.00
+// @description  test bot
+// @author       Mochalin Sergey
+// @match        https://www.baidu.com/*
+// @grant        none
+// ==/UserScript==
+
+let baiduInput = document.getElementsByName("wd")[0];
+let baiduBtn = document.getElementById("su");
+let keywords = ["Базовые вещи про GIT", "10 самых популярных шрифтов от Google", "Отключение редакций и ревизий в WordPress"];
+let keyword = keywords[getRandom(0, keywords.length)];
+
+
+if (baiduInput.getBoundingClientRect().y > 100) {
+    baiduInput.value = keyword;
+    baiduBtn.click();
+    window.onload = () => {searchPage()};
+};
+
+function searchPage() {
+    let links = document.getElementsByClassName("c-title t t tts-title");
+    for (let i = 0; i < links.length; i++) {
+    if (links[i].children[0].text.toLowerCase().includes(" napli")) {
+        links[i].children[0].target = "_self"
+        links[i].children[0].click();
+        break;}
+    };
+};
+
+function getRandom(min, max) {return Math.floor(Math.random() * (max - min) + min)};
