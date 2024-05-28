@@ -1,0 +1,72 @@
+// ==UserScript==
+// @name         bot rambler
+// @namespace    http://tampermonkey.net/
+// @version      1.11
+// @description  test bot for rambler search engine
+// @author       Mochalin Serge
+// @match        https://www.rambler.ru/*
+// @match        https://nova.rambler.ru/*
+// @grant        none
+// ==/UserScript==
+
+let rambInput = document.getElementsByName("query")[0];
+let rambBtn = rambInput.nextElementSibling;
+let keywords = ["Базовые вещи про GIT", "10 самых популярных шрифтов от Google",
+                "Отключение редакций и ревизий в WordPress", "Vite или Webpack?",
+                "Вывод произвольных типов записей и полей"];
+let keyword = keywords[getRandom(0, keywords.length)];
+let links = document.links;
+
+// работаем на главной странице
+if (document.querySelector(".Paging__root--NWAPZ") === null && location.hostname !== "napli.ru") {
+    rambBtn.focus();
+    rambInput.value = keyword;
+    rambBtn.click();
+
+// работаем на целевом сайте
+} else if (location.hostname == "napli.ru") {
+
+    setInterval(() => {
+        let linkIndex = getRandom(0, links.length);
+        let localLink = links[linkIndex];
+
+        if (getRandom(0, 101) > 50) location.href = "https://www.rambler.com/"; //вероятность прекращения работы на целевом сайте
+        if (links.length == 0) location.href = "https://napli.ru";
+        if (localLink.href.includes("napli.ru")) localLink.click();
+    }, getRandom(3000, 5000))
+
+// работаем на странице поисковой выдачи
+} else if (document.querySelector(".Paging__root--NWAPZ") !== null) {
+    let nextPage = true;
+    for (let i = 0; i < links.length; i++) {
+        if (links[i].href.indexOf("napli.ru") != -1) {
+            nextPage = false;
+            links[i].target = "_self";
+            links[i].click();
+            break;
+           // setTimeout(() => {link.click();}, getRandom(2000, 3000)); break;
+        }
+    }
+
+    let elementExist = setInterval(() => {
+        let elem = document.querySelector("span[class^='Paging__paging__link_current']");
+
+        if (elem !== null ) {
+            if (elem.innerText == "5") {
+                nextPage = false;
+                location.href = "https://www.rambler.ru/";
+            }
+            clearInterval(elementExist);
+        }
+    }, 100)
+
+
+    if (nextPage) {
+        setTimeout(() => {
+            document.querySelector("a[class^='Paging__paging__link_next']").click();
+        }, getRandom(2500, 3500))
+
+    }
+}
+
+function getRandom(min, max) {return Math.floor(Math.random() * (max - min) + min)}
